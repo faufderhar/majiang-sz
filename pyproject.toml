@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "majiang-sz"
+version = "1.0.0"
+description = "四川麻将辅助分析工具 — 向听数计算、出牌推荐、YOLO 牌面识别"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "flask>=3.0",
+    "flask-cors>=4.0",
+]
+
+[project.optional-dependencies]
+detection = [
+    "ultralytics>=8.0",
+    "opencv-python>=4.8",
+    "pillow>=10.0",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+majiang = "app:main"
+
+[tool.setuptools.packages.find]
+include = ["engine*", "detection*", "web*"]
+
+[tool.setuptools.package-data]
+web = ["*.html", "*.css", "*.js", "*.json", "*.png"]
+detection = ["*.yaml"]

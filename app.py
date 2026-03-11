@@ -346,11 +346,15 @@ def model_status():
         'model_path': model_path,
     })
 
-
-if __name__ == '__main__':
+def main():
+    """启动 Web 服务器（pip install 后可用 majiang 命令启动）"""
     print("\n" + "=" * 50)
     print("  🀄 麻将辅助工具 — Web Demo")
     print("  打开浏览器访问: http://localhost:5001")
     print("=" * 50 + "\n")
     app.run(debug=True, host='0.0.0.0', port=5001)
+
+
+if __name__ == '__main__':
+    main()
 
