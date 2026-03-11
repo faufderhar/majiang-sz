@@ -1,0 +1,11 @@
+# 核心依赖
+flask>=3.0
+flask-cors>=4.0
+
+# 牌面识别（可选，不用摄像头识别可不装）
+ultralytics>=8.0
+opencv-python>=4.8
+pillow>=10.0
+
+# 测试
+pytest>=8.0

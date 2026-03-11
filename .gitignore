@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# 模型文件（体积大，不提交到 Git）
+models/*.pt
+models/*.onnx
+models/*.tflite
+!models/README.md
+!models/model_config.json
+
+# 训练产出
+runs/
+detection/datasets/
+
+# 临时文件
+*.log
+tmp/
+/tmp/
+
+# 工具配置
+.ace-tool/
+.pytest_cache/

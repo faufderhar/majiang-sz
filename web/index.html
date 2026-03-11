@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🀄 麻将辅助分析 — 四川麻将</title>
+    <meta name="description" content="四川麻将辅助分析工具，实时计算向听数、有效进牌和出牌推荐">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- PWA 支持 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- 顶部标题栏 -->
+        <header class="app-header">
+            <div class="logo">🀄</div>
+            <div class="header-text">
+                <h1>麻将辅助分析</h1>
+                <p class="subtitle">四川麻将 · 血战到底</p>
+            </div>
+        </header>
+
+        <!-- 缺门选择 -->
+        <section class="section missing-suit-section">
+            <h2 class="section-title">
+                <span class="section-icon">🎯</span>
+                选择缺门
+            </h2>
+            <div class="missing-suit-options">
+                <button class="suit-btn" data-suit="wan" onclick="selectMissingSuit('wan')">
+                    <span class="suit-icon">🀇</span>
+                    <span class="suit-label">缺万</span>
+                </button>
+                <button class="suit-btn" data-suit="tong" onclick="selectMissingSuit('tong')">
+                    <span class="suit-icon">🀙</span>
+                    <span class="suit-label">缺筒</span>
+                </button>
+                <button class="suit-btn active" data-suit="tiao" onclick="selectMissingSuit('tiao')">
+                    <span class="suit-icon">🀐</span>
+                    <span class="suit-label">缺条</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 手牌选择区 -->
+        <section class="section hand-section">
+            <h2 class="section-title">
+                <span class="section-icon">🤚</span>
+                选择手牌
+                <span class="tile-count" id="tileCount">0 / 14 张</span>
+            </h2>
+
+            <!-- 万子选择 -->
+            <div class="tile-group" id="group-wan">
+                <div class="group-label">万子</div>
+                <div class="tile-row">
+                    <button class="tile-btn" data-tile="1m" onclick="toggleTile(this)">
+                        <span class="tile-face">一</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-1m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="2m" onclick="toggleTile(this)">
+                        <span class="tile-face">二</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-2m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="3m" onclick="toggleTile(this)">
+                        <span class="tile-face">三</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-3m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="4m" onclick="toggleTile(this)">
+                        <span class="tile-face">四</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-4m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="5m" onclick="toggleTile(this)">
+                        <span class="tile-face">五</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-5m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="6m" onclick="toggleTile(this)">
+                        <span class="tile-face">六</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-6m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="7m" onclick="toggleTile(this)">
+                        <span class="tile-face">七</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-7m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="8m" onclick="toggleTile(this)">
+                        <span class="tile-face">八</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-8m">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="9m" onclick="toggleTile(this)">
+                        <span class="tile-face">九</span>
+                        <span class="tile-suit">万</span>
+                        <span class="tile-count-badge" id="count-9m">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 筒子选择 -->
+            <div class="tile-group" id="group-tong">
+                <div class="group-label">筒子</div>
+                <div class="tile-row">
+                    <button class="tile-btn" data-tile="1p" onclick="toggleTile(this)">
+                        <span class="tile-face">一</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-1p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="2p" onclick="toggleTile(this)">
+                        <span class="tile-face">二</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-2p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="3p" onclick="toggleTile(this)">
+                        <span class="tile-face">三</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-3p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="4p" onclick="toggleTile(this)">
+                        <span class="tile-face">四</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-4p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="5p" onclick="toggleTile(this)">
+                        <span class="tile-face">五</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-5p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="6p" onclick="toggleTile(this)">
+                        <span class="tile-face">六</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-6p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="7p" onclick="toggleTile(this)">
+                        <span class="tile-face">七</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-7p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="8p" onclick="toggleTile(this)">
+                        <span class="tile-face">八</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-8p">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="9p" onclick="toggleTile(this)">
+                        <span class="tile-face">九</span>
+                        <span class="tile-suit tong">筒</span>
+                        <span class="tile-count-badge" id="count-9p">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 条子选择 -->
+            <div class="tile-group" id="group-tiao">
+                <div class="group-label">条子</div>
+                <div class="tile-row">
+                    <button class="tile-btn" data-tile="1s" onclick="toggleTile(this)">
+                        <span class="tile-face">一</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-1s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="2s" onclick="toggleTile(this)">
+                        <span class="tile-face">二</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-2s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="3s" onclick="toggleTile(this)">
+                        <span class="tile-face">三</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-3s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="4s" onclick="toggleTile(this)">
+                        <span class="tile-face">四</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-4s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="5s" onclick="toggleTile(this)">
+                        <span class="tile-face">五</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-5s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="6s" onclick="toggleTile(this)">
+                        <span class="tile-face">六</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-6s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="7s" onclick="toggleTile(this)">
+                        <span class="tile-face">七</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-7s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="8s" onclick="toggleTile(this)">
+                        <span class="tile-face">八</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-8s">0</span>
+                    </button>
+                    <button class="tile-btn" data-tile="9s" onclick="toggleTile(this)">
+                        <span class="tile-face">九</span>
+                        <span class="tile-suit tiao">条</span>
+                        <span class="tile-count-badge" id="count-9s">0</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 已选手牌展示 -->
+        <section class="section selected-section">
+            <h2 class="section-title">
+                <span class="section-icon">📋</span>
+                当前手牌
+                <button class="clear-btn" onclick="clearHand()">清空</button>
+            </h2>
+            <div class="selected-tiles" id="selectedTiles">
+                <div class="empty-hint">👆 点击上方的牌来添加到手牌</div>
+            </div>
+        </section>
+
+        <!-- 摄像头拍照区 -->
+        <section class="section camera-section" id="cameraSection">
+            <h2 class="section-title">
+                <span class="section-icon">📷</span>
+                摄像头识别
+                <span class="camera-status" id="cameraStatus">未启用</span>
+            </h2>
+            <div class="camera-container" id="cameraContainer">
+                <div class="camera-placeholder" id="cameraPlaceholder">
+                    <div class="camera-icon">📷</div>
+                    <p>点击下方按钮打开摄像头</p>
+                    <p class="camera-hint">对准手牌拍照，自动识别牌面</p>
+                </div>
+                <video id="cameraVideo" autoplay playsinline style="display:none;"></video>
+                <canvas id="cameraCanvas" style="display:none;"></canvas>
+                <img id="capturedImage" style="display:none;">
+            </div>
+            <div class="camera-actions">
+                <button class="camera-btn" id="startCameraBtn" onclick="startCamera()">
+                    <span>📷</span> 开启摄像头
+                </button>
+                <button class="camera-btn capture" id="captureBtn" onclick="captureAndDetect()" style="display:none;">
+                    <span>📸</span> 拍照识别
+                </button>
+                <button class="camera-btn stop" id="stopCameraBtn" onclick="stopCamera()" style="display:none;">
+                    <span>⏹</span> 关闭
+                </button>
+            </div>
+            <div class="model-notice" id="modelNotice" style="display:none;">
+                ⚠️ YOLO 模型未加载，请先训练模型。可用手动选牌模式代替。
+            </div>
+        </section>
+
+        <!-- 分析按钮 -->
+        <div class="action-bar">
+            <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
+                <span class="btn-icon">🔍</span>
+                开始分析
+            </button>
+        </div>
+
+        <!-- 分析结果 -->
+        <section class="section result-section" id="resultSection" style="display: none;">
+            <h2 class="section-title">
+                <span class="section-icon">📊</span>
+                分析结果
+            </h2>
+            
+            <!-- 向听数 -->
+            <div class="result-card shanten-card" id="shantenCard">
+                <div class="result-label">向听数</div>
+                <div class="result-value" id="shantenValue">—</div>
+                <div class="result-desc" id="shantenText"></div>
+            </div>
+
+            <!-- 有效进牌 -->
+            <div class="result-card effective-card" id="effectiveCard" style="display: none;">
+                <div class="result-label">🎯 有效进牌</div>
+                <div class="result-desc" id="effectiveTotal"></div>
+                <div class="effective-tiles" id="effectiveTiles"></div>
+            </div>
+
+            <!-- 出牌推荐 -->
+            <div class="result-card recommend-card" id="recommendCard" style="display: none;">
+                <div class="result-label">💡 出牌推荐</div>
+                <div class="result-desc">按优先级从高到低排列</div>
+                <div class="recommend-list" id="recommendList"></div>
+            </div>
+        </section>
+
+        <!-- 底部信息 -->
+        <footer class="app-footer">
+            <p>四川麻将辅助分析工具 · 仅供学习参考</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
