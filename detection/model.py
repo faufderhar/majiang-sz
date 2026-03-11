@@ -111,23 +111,67 @@ class MahjongDetector:
         self.model_path = model_path
         self.confidence_threshold = confidence_threshold
         self.model = None
+        self.device = 'cpu'
         
-        # 延迟导入 ultralytics（可能未安装）
+        # 外部模型类别映射（34→27 适配）
+        # 如果为 None，表示模型类别与本项目一致，不需要映射
+        self._class_mapping = None
+        
+        self._detect_device()
         self._load_model()
     
+    def _detect_device(self):
+        """
+        自动检测最佳推理设备。
+        
+        优先级：MPS（Apple Silicon）> CUDA（NVIDIA）> CPU
+        MPS 对 Mac 用户非常重要，可以利用 Apple GPU 大幅加速。
+        """
+        try:
+            import torch
+            if torch.cuda.is_available():
+                self.device = 'cuda'
+            elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+                self.device = 'mps'
+            else:
+                self.device = 'cpu'
+        except ImportError:
+            self.device = 'cpu'
+        print(f"📱 推理设备: {self.device}")
+    
     def _load_model(self):
-        """加载 YOLO 模型"""
+        """加载 YOLO 模型并自动检测类别适配"""
         try:
             from ultralytics import YOLO
             
             if not os.path.exists(self.model_path):
                 print(f"⚠️ 模型文件不存在: {self.model_path}")
                 print("请先训练模型或下载预训练模型。")
-                print("可以运行: python detection/train.py --download-pretrained")
                 return
             
             self.model = YOLO(self.model_path)
-            print(f"✅ 模型加载成功: {self.model_path}")
+            
+            # 检测模型类别数，自动适配
+            num_classes = len(self.model.names)
+            if num_classes == 34:
+                # 外部 34 类模型（含字牌），需要映射到 27 类
+                print(f"🔄 检测到 34 类模型，自动适配到 27 类（过滤字牌）")
+                # 映射: 饼(0-8)→筒(9-17), 条(9-17)→条(18-26), 万(18-26)→万(0-8)
+                self._class_mapping = {}
+                for i in range(9):  # 饼→筒
+                    self._class_mapping[i] = 9 + i
+                for i in range(9):  # 条→条
+                    self._class_mapping[9 + i] = 18 + i
+                for i in range(9):  # 万→万
+                    self._class_mapping[18 + i] = i
+                # 字牌(27-33)→忽略，不加入映射
+            elif num_classes == 27:
+                self._class_mapping = None  # 直接对应
+            else:
+                print(f"⚠️ 模型有 {num_classes} 个类别，期望 27 或 34")
+                self._class_mapping = None
+            
+            print(f"✅ 模型加载成功: {self.model_path} ({num_classes} 类)")
             
         except ImportError:
             print("⚠️ ultralytics 未安装，请运行: pip install ultralytics")
@@ -154,9 +198,13 @@ class MahjongDetector:
         
         try:
             # 执行 YOLO 推理
+            # device: 使用自动检测的最佳设备
+            # imgsz: 640 在速度和精度之间取得平衡
             results = self.model(
                 image_source,
                 conf=self.confidence_threshold,
+                device=self.device,
+                imgsz=640,
                 verbose=False  # 不打印推理日志
             )
             
@@ -168,9 +216,17 @@ class MahjongDetector:
                     continue
                 
                 for i in range(len(boxes)):
-                    class_id = int(boxes.cls[i].item())
+                    raw_class_id = int(boxes.cls[i].item())
                     confidence = float(boxes.conf[i].item())
                     bbox = boxes.xyxy[i].tolist()  # [x1, y1, x2, y2]
+                    
+                    # 如果有类别映射（34→27），进行转换
+                    if self._class_mapping is not None:
+                        class_id = self._class_mapping.get(raw_class_id, -1)
+                        if class_id < 0:
+                            continue  # 跳过字牌等不需要的类别
+                    else:
+                        class_id = raw_class_id
                     
                     if class_id < len(CLASS_NAMES):
                         det = DetectionResult(class_id, confidence, tuple(bbox))
